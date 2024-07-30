@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from objectdetection import ObjectDetection  
-from FaceRec import NFRscript as fr
+from FaceRec2 import NFRscript as fr
 from Distance.CallDistance2 import DistanceCalculator, Frame, Individual
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
