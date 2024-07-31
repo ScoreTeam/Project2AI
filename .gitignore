@@ -1,0 +1,10 @@
+*.h5
+*.jpg
+*.avif
+*.png
+/Gaze
+EyeTest.py
+EyeTest2.py
+newtest.py
+testtt.py
+pynbmain.ipynb

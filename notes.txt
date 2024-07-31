@@ -1,0 +1,70 @@
+example of stage 2 output:
+
+[('Croppedimages/cropped_image.jpg', (235.58273511829785, 39.231348744351386, 111.44506834408621, 313.358240963784), ['emp2', 0, 0, 111, 
+314, 111, 314, -2.220446049250313e-16]),
+ ('Croppedimages/cropped_image_1.jpg', (147.0880398620095, 35.12008606373994, 105.21230969104076, 328.8038020858962), ['Customer', 0, 0, 0, 0, 0, 0, 0])]
+
+hamza:
+[
+    {'id': '1', 'type': 'customer', 'coords': (337, 288), 'gender': 'male',
+ 'full_body_height_px': 418}, {'id': '2', 'type': 'customer', 'coords': (25, 92),
+  'gender': 'female', 'full_body_height_px': 356}, {'id': '3', 'type': 'customer', 
+  'coords': (473, 459), 'gender': 'female', 'full_body_height_px': 450}]
+
+
+current output:
+[
+    {
+        "frame info": {
+            "id": "2",
+            "type": "employee",
+            "coords": [
+                235.58273511829785,
+                39.231348744351386
+            ],
+            "gender": "male",
+            "full_body_height_px": 318
+        }
+    },
+    {
+        "frame info": {
+            "id": "0",
+            "type": "customer",
+            "coords": [
+                147.0880398620095,
+                35.12008606373994
+            ],
+            "gender": "male",
+            "full_body_height_px": 318
+        }
+    }
+]
+
+if __name__=="__main__":
+    score=Score()
+    od=ObjectDetection()
+    dis=DistanceCalculator()
+    FPS=5
+    timeupdate=1/FPS
+    videopath="object_detection/videos/sample.mp4"
+    outputfolder="frames-temp"
+    # score.VideoToFrames(videopath,2,outputfolder)
+    # frametest=f"{outputfolder}/frame_0.jpg"
+    frametest="three.jpg"
+    # print(frametest)
+    # image=cv2.imread(frametest)
+    # cv2.imshow("image",image)
+    # cv2.waitKey(0)
+    box_coordinate=od.DetectImage(frametest)
+    labeled_boxes,heights=score.FaceRec(frametest,box_coordinate)
+    labeled_boxes_json=score.fhamza(labeled_boxes,heights)
+    Updatedframe=dis.process_frame(labeled_boxes_json,timeupdate)
+
+
+
+    notes
+    """
+    Should we make one clearing function for everything at the start?
+    
+
+    """

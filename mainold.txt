@@ -1,0 +1,112 @@
+this is my python code :
+import cv2,os,json
+from objectdetection import ObjectDetection  
+from FaceRec import NFRscript as fr
+from Distance.CallDistance2 import DistanceCalculator, Frame, Individual
+
+
+class Score:
+    def __init__(self) :
+        pass
+        
+    def VideoToFrames(self,videopath,FPS,Outputpath):
+
+        # videopath = 'object_detection/videos/sample.mp4 ' 
+        cap = cv2.VideoCapture(videopath)  
+        frame_folder = Outputpath  
+        os.makedirs(frame_folder, exist_ok=True)  
+        count = 0  
+        while cap.isOpened():  
+            ret, frame = cap.read()  
+            if not ret:  
+                break  
+            if count % (cap.get(cv2.CAP_PROP_FPS) // FPS) == 0:  
+                cv2.imwrite(os.path.join(frame_folder, f'frame_{count}.jpg'), frame)  
+            count += 1  
+        cap.release()
+    def FaceRec(self,frame,box_coordinate):
+        labeledboxes=fr.DetectFace(frame,box_coordinate)
+        return labeledboxes
+
+    def fhamza(self, data,heights) -> Frame:
+        individuals = []
+        for idx, item in enumerate(data):
+            print("Info: item[2][8], [4]",item[2][8]," - ",item[2][4],"\n[6]=",item[2][6])
+            individual_info = {
+                
+                "id": int(item[2][1]),
+                "type": item[2][0],
+                "start_coords": [float(item[1][0]), float(item[1][1])],
+                # note:modify this with nour's stuff
+                "gender": "male" if item[2][1] == '2' else 'male',
+                "full_body_height_px":  int(item[1][3]), 
+                "face_height_px": int(heights[idx]) ,
+
+            }
+
+            individual = Individual(
+                id=individual_info["id"],
+                type=individual_info["type"],
+                start_coords=tuple(individual_info["start_coords"]),
+                gender=individual_info["gender"],
+                full_body_height_px=individual_info["full_body_height_px"],
+                face_height=individual_info["face_height_px"],
+            )
+
+            individuals.append(individual)
+
+        frame_info = Frame(
+            individuals=individuals,
+            max_distance_cm=50,
+            image_height=408
+        )
+
+        print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        print(f"Frame max distance: {frame_info.max_distance_cm} cm, Image height: {frame_info.image_height} px")
+        print("Individuals info:")
+        for individual in frame_info.individuals:
+            print(f"  ID: {individual.id}, Type: {individual.type}, Start Coords: {individual.start_coords}, "
+                  f"Gender: {individual.gender}, Full Body Height: {individual.full_body_height_px}px, "
+                  f"Face Height: {individual.face_height_px}px, Coords: {individual.coords}")
+        print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+        
+        return frame_info
+
+        #     json_list.append(frame_info)
+
+        # json_list = json.loads(json.dumps(json_list, default=lambda o: o.item() if isinstance(o, np.generic) else o))
+
+        # json_output = json.dumps(json_list, indent=4)
+        # print(json_output)
+        # return json_output
+    def ProcessFrame(self,image,FPS):
+        od=ObjectDetection()
+        dis=DistanceCalculator()
+        timeupdate=1/FPS
+        box_coordinate=od.DetectImage(image)
+        labeled_boxes,heights=self.FaceRec(image,box_coordinate)
+        labeled_boxes_json=self.fhamza(labeled_boxes,heights)
+        Updatedframe=dis.process_frame(labeled_boxes_json,timeupdate)
+        return Updatedframe
+    
+if __name__=="__main__":
+    score=Score()
+    od=ObjectDetection()
+    dis=DistanceCalculator()
+    FPS=5
+    timeupdate=1/FPS
+    videopath="object_detection/videos/sample.mp4"
+    outputfolder="frames-temp"
+    # score.VideoToFrames(videopath,2,outputfolder)
+    # frametest=f"{outputfolder}/frame_0.jpg"
+    frametest="three.jpg"
+    # print(frametest)
+    # image=cv2.imread(frametest)
+    # cv2.imshow("image",image)
+    # cv2.waitKey(0)
+    box_coordinate=od.DetectImage(frametest)
+    labeled_boxes,heights=score.FaceRec(frametest,box_coordinate)
+    labeled_boxes_json=score.fhamza(labeled_boxes,heights)
+    Updatedframe=dis.process_frame(labeled_boxes_json,timeupdate)
+    
+   
